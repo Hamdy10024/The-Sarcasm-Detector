@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/omarshawky/development/The-Sarcasm-Detector/model\\sarcasm_model.ckpt"
+all_model_checkpoint_paths: "/Users/omarshawky/development/The-Sarcasm-Detector/model\\sarcasm_model.ckpt"

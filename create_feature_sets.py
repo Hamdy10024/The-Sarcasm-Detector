@@ -16,6 +16,7 @@ from textblob import TextBlob
 import nltk
 import string
 import exp_replace
+import load_sent
 import random
 
 # Read the data from numpy files into arrays
@@ -25,6 +26,8 @@ regular_data = np.load('negproc.npy')
 featuresets = []
 classes = ["SARCASTIC", "REGULAR"]
 
+sentiments = load_sent.load_sent_word_net()
+
 
 def extractFeatures():
     """
@@ -32,12 +35,9 @@ def extractFeatures():
     array.
     :return:
     """
-    print("We have " + str(len(sarcastic_data)) + " Sarcastic sentences.")
-    print("We have " + str(len(regular_data)) + " Regular sentences.")
-
-    print("Extracting features for negative set")
     # We have 4 times more Regular data as Positive data. Hence we only take
     # every 4th sentence from the Regular data.
+    print("Extracting features for negative set")
     for x in regular_data[::4]:
         features = extractFeatureOfASentence(x)
         featuresets.append([features, [0, 1]])
@@ -52,7 +52,7 @@ def extractFeatures():
     featuresets1 = np.array(featuresets)
 
     # Save the features into a numpy file.
-    np.save('featuresets', featuresets1)
+    np.save('featuresets2', featuresets1)
 
 
 def extractFeatureOfASentence(sen):
@@ -76,16 +76,27 @@ def extractFeatureOfASentence(sen):
     :return:
     """
     features = []
-
+    # adding capitilization feature
+    counter = 0
+    threshold = 4
+    sentence_plain = sen.decode('UTF-8')
+    for j in range(len(sentence_plain)):
+        counter += int(sentence_plain[j].isupper())
+    features.append(int(counter >= threshold))
+    # end of adding capitization  feature
     # Tokenize the sentence and then convert everthing to lower case.
     tokens = nltk.word_tokenize(exp_replace.replace_emo(str(sen)))
     tokens = [(t.lower()) for t in tokens]
+    # Adding pos_feature
+    pos_vector = sentiments.posvector(tokens)
+    for j in range(len(pos_vector)):
+        features.append(pos_vector[j])
+    # End of adding pos_feature
 
     # Extract features of full sentence.
     fullBlob = TextBlob(joinTokens(tokens))
     features.append(fullBlob.sentiment.polarity)
     features.append(fullBlob.sentiment.subjectivity)
-
     # Extract features of halves.
     size = len(tokens) // 2
     parts = []
