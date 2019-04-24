@@ -76,14 +76,14 @@ def extractFeatureOfASentence(sen):
     :return:
     """
     features = []
-    # adding capitilization feature
+    # adding capitalization feature
     counter = 0
     threshold = 4
     sentence_plain = sen.decode('UTF-8')
     for j in range(len(sentence_plain)):
         counter += int(sentence_plain[j].isupper())
     features.append(int(counter >= threshold))
-    # end of adding capitization  feature
+    # end of adding capitalization  feature
     # Tokenize the sentence and then convert everthing to lower case.
     tokens = nltk.word_tokenize(exp_replace.replace_emo(str(sen)))
     tokens = [(t.lower()) for t in tokens]
