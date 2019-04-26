@@ -6,9 +6,9 @@ consumed by the model.
 This file needs two files with positive and regular data that is cleaned and
 pre-processed. The names of the files should be 'negproc.npy' and 'posproc.npy'
 
-@Author Sanjay Haresh Khatwani (sxk6714@rit.edu)
-@Author Savitha Jayasankar (skj9180@rit.edu)
-@Author Saurabh Parekh (sbp4709@rit.edu)
+set1 : the features written as comments.
+set2 : set1 + pos_vector + boolean if capital words are more than threshold.
+set3 : set1 + pos_vector + number of capital words.
 """
 
 import numpy as np
@@ -16,7 +16,6 @@ from textblob import TextBlob
 import nltk
 import string
 import exp_replace
-import load_sent
 import random
 
 # Read the data from numpy files into arrays
@@ -25,8 +24,6 @@ regular_data = np.load('negproc.npy')
 
 featuresets = []
 classes = ["SARCASTIC", "REGULAR"]
-
-sentiments = load_sent.load_sent_word_net()
 
 
 def extractFeatures():
@@ -52,7 +49,7 @@ def extractFeatures():
     featuresets1 = np.array(featuresets)
 
     # Save the features into a numpy file.
-    np.save('featuresets2', featuresets1)
+    np.save('featuresets3', featuresets1)
 
 
 def extractFeatureOfASentence(sen):
@@ -82,13 +79,13 @@ def extractFeatureOfASentence(sen):
     sentence_plain = sen.decode('UTF-8')
     for j in range(len(sentence_plain)):
         counter += int(sentence_plain[j].isupper())
-    features.append(int(counter >= threshold))
+    features.append(counter)
     # end of adding capitalization  feature
     # Tokenize the sentence and then convert everthing to lower case.
     tokens = nltk.word_tokenize(exp_replace.replace_emo(str(sen)))
     tokens = [(t.lower()) for t in tokens]
     # Adding pos_feature
-    pos_vector = sentiments.posvector(tokens)
+    pos_vector = posvector(tokens)
     for j in range(len(pos_vector)):
         features.append(pos_vector[j])
     # End of adding pos_feature
@@ -183,6 +180,25 @@ def joinTokens(t):
         if i not in string.punctuation and not i.startswith("'"):
             s += (" " + i)
     return s.strip()
+
+
+def posvector(sentence):
+
+    pos_vector = nltk.pos_tag(sentence)
+    vector = np.zeros(4)
+
+    for j in range(len(sentence)):
+        pos = pos_vector[j][1]
+        if pos[0:2] == 'NN':
+            vector[0] += 1
+        elif pos[0:2] == 'JJ':
+            vector[1] += 1
+        elif pos[0:2] == 'VB':
+            vector[2] += 1
+        elif pos[0:2] == 'RB':
+            vector[3] += 1
+
+    return vector
 
 
 if __name__ == '__main__':

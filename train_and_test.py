@@ -8,15 +8,13 @@ This file is responsible for:
 This file needs a featuresets.npy file as input with extracted features.
 Features can be extracted using create_feature_sets.py
 
-@Author Sanjay Haresh Khatwani (sxk6714@rit.edu)
-@Author Savitha Jayasankar (skj9180@rit.edu)
-@Author Saurabh Parekh (sbp4709@rit.edu)
 """
 
 import tensorflow as tf
 import os
 import numpy as np
 import sklearn.metrics as sk
+
 
 def divideFeatureSets(features):
     """
@@ -41,11 +39,13 @@ def divideFeatureSets(features):
 
     return train_input, train_output, test_input, test_output
 
+
 # Load the featuresets array
 featuresets = np.load('featuresets.npy')
 
 # Divide the feature sets into training and testing set.
-train_input, train_output, test_input, test_output = divideFeatureSets(featuresets)
+train_input, train_output, test_input, test_output = divideFeatureSets(
+    featuresets)
 
 # Define number of nodes in each layer
 number_nodes_HL1 = 100
@@ -65,27 +65,27 @@ y = tf.placeholder('float')
 #  random numbers.
 with tf.name_scope("HiddenLayer1"):
     hidden_1_layer = {'number_of_neurons': number_nodes_HL1,
-                  'layer_weights': tf.Variable(
-                      tf.random_normal([len(train_input[0]), number_nodes_HL1])),
-                  'layer_biases': tf.Variable(tf.random_normal([number_nodes_HL1]))}
+                      'layer_weights': tf.Variable(
+                          tf.random_normal([len(train_input[0]), number_nodes_HL1])),
+                      'layer_biases': tf.Variable(tf.random_normal([number_nodes_HL1]))}
 
 with tf.name_scope("HiddenLayer2"):
     hidden_2_layer = {'number_of_neurons': number_nodes_HL2,
-                  'layer_weights': tf.Variable(
-                      tf.random_normal([number_nodes_HL1, number_nodes_HL2])),
-                  'layer_biases': tf.Variable(tf.random_normal([number_nodes_HL2]))}
+                      'layer_weights': tf.Variable(
+                          tf.random_normal([number_nodes_HL1, number_nodes_HL2])),
+                      'layer_biases': tf.Variable(tf.random_normal([number_nodes_HL2]))}
 
 with tf.name_scope("HiddenLayer3"):
     hidden_3_layer = {'number_of_neurons': number_nodes_HL3,
-                  'layer_weights': tf.Variable(
-                      tf.random_normal([number_nodes_HL2, number_nodes_HL3])),
-                  'layer_biases': tf.Variable(tf.random_normal([number_nodes_HL3]))}
+                      'layer_weights': tf.Variable(
+                          tf.random_normal([number_nodes_HL2, number_nodes_HL3])),
+                      'layer_biases': tf.Variable(tf.random_normal([number_nodes_HL3]))}
 
 with tf.name_scope("OutputLayer"):
     output_layer = {'number_of_neurons': None,
-                'layer_weights': tf.Variable(
-                    tf.random_normal([number_nodes_HL3, n_classes])),
-                'layer_biases': tf.Variable(tf.random_normal([n_classes])),}
+                    'layer_weights': tf.Variable(
+                        tf.random_normal([number_nodes_HL3, n_classes])),
+                    'layer_biases': tf.Variable(tf.random_normal([n_classes])), }
 
 merged_summary_op = tf.summary.merge_all()
 logs_path = '/tmp/logs'
@@ -106,17 +106,20 @@ def neural_network_model(data):
     l1 = tf.nn.relu(l1)
 
     # the ouput of second layer is output of first layer *  weights + biases
-    l2 = tf.add(tf.matmul(l1, hidden_2_layer['layer_weights']), hidden_2_layer['layer_biases'])
+    l2 = tf.add(
+        tf.matmul(l1, hidden_2_layer['layer_weights']), hidden_2_layer['layer_biases'])
     # Logit
     l2 = tf.nn.relu(l2)
 
     # Similar as previous
-    l3 = tf.add(tf.matmul(l2, hidden_3_layer['layer_weights']), hidden_3_layer['layer_biases'])
+    l3 = tf.add(
+        tf.matmul(l2, hidden_3_layer['layer_weights']), hidden_3_layer['layer_biases'])
     l3 = tf.nn.relu(l3)
 
     # Finally the output is output of last layer * weights + biases. No logit
     #  for last layer as this layer's output is not fed to any other layer.
-    output = tf.matmul(l3, output_layer['layer_weights']) + output_layer['layer_biases']
+    output = tf.matmul(
+        l3, output_layer['layer_weights']) + output_layer['layer_biases']
 
     return output
 
@@ -195,10 +198,10 @@ def train_neural_network(x):
         # Get actual classes
         y_true = np.argmax(test_output, 1)
 
-        #Calculate f1 score using scikit-learn.
+        # Calculate f1 score using scikit-learn.
         print('F1 Score:', sk.f1_score(y_true, y_pred))
 
-        #Print out the confusion matrix
+        # Print out the confusion matrix
         print(sk.confusion_matrix(y_true, y_pred))
 
         print('Accuracy:', accuracy.eval({x: test_input, y: test_output}))
@@ -210,7 +213,6 @@ def train_neural_network(x):
 
 if __name__ == '__main__':
 
-        
-    print("Run the command line:\n" \
-          "--> tensorboard --logdir=/tmp/logs " \
+    print("Run the command line:\n"
+          "--> tensorboard --logdir=/tmp/logs "
           "\nThen open http://0.0.0.0:6006/ into your web browser")
